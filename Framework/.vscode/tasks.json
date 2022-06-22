@@ -1,0 +1,204 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		/////////////////////////////////////////////
+		// # Creating
+		/////////////////////////////////////////////
+
+		// ## Mac need to create bin folder
+		{
+			"label": "Create Bin folder",
+			"type": "shell",
+			"group": "none",
+			"windows":{ // Window命令
+				"command": "mkdir",
+				"args": [
+					"-p",
+					"bin/${input:buildProject}",
+					";", // PowerShell command， 不能用"&&"
+					"echo",
+					"Create BIN folder."
+				],
+			},
+			"osx": { // Mac命令
+				"command": "mkdir",
+				"args": [
+					"-p",
+					"bin/${input:buildProject}",
+					"&&",
+					"echo",
+					"Create BIN folder."
+				]
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/../" // 指定当前的工作文件夹
+			},
+		},
+
+		/////////////////////////////////////////////
+		// # Cleaning
+		/////////////////////////////////////////////
+
+		// ## Clean build files
+		{
+			"label": "Clean Build folder",
+			"type": "shell",
+			"group": "none",
+			"windows": {
+				"command": "Remove-Item",
+				"args": [
+					"build",
+					"-Force",
+					"-Recurse",
+					"-Confirm:$false",
+					";",
+					"echo",
+					"Cleaning build folder."
+				]
+			},
+			"osx": {
+				"command": "rm -f -r build && echo Cleaning Build folder."
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/../"
+			},
+		},
+		// ## Clean bin files
+		{
+			"label": "Clean Bin folder",
+			"type": "shell",
+			"group": "none",
+			"windows": {
+				"command": "Remove-Item",
+				"args": [
+					"bin*",
+					"-Force",
+					"-Recurse",
+					"-Confirm:$false",
+					";",
+					"echo",
+					"Cleaning bin folder."
+				]
+			},
+			"osx": {
+				"command": "rm -f -r bin* && echo Cleaning bin folder."
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/../"
+			},
+		},
+
+		/////////////////////////////////////////////
+		// # Project files generation(premake5)
+		/////////////////////////////////////////////
+
+		// ## vs2022
+		{
+			"label": "Generate build files (vs2022)",
+			"type": "shell",
+			"group": "none",
+			"command": "premake5 vs2022"
+		},
+		// ## XCode
+		{
+			"label": "Generate build files (XCode)",
+			"type": "shell",
+			"group": "none",
+			"command": "premake5 xcode4"
+		},
+
+		/////////////////////////////////////////////
+		// # Project files build
+		/////////////////////////////////////////////
+
+		// ## vs2022
+		{
+			"dependsOn":[
+				"Generate build files (vs2022)"
+			],
+			"label": "Build (vs2022)",
+			"type": "shell",
+			"group": "build",
+			"command": "msbuild", //需要通过Visual Studio命令行打开, 比如(x64_x86 Cross Tools Command Prompt for vs2022)
+			"args": [
+				"${workspaceFolderBasename}.sln",
+				"/m",
+				"/property:Platform=x64",
+				"/property:Configuration=${input:buildMode}",
+				// Ask msbuild to generate full paths for file names.
+				"/property:GenerateFullPaths=true",
+				"/t:build"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/../build"
+			},
+			"problemMatcher": ["$msCompile"], //捕捉编译时编译器在终端里显示的报错信息
+			"presentation": {
+				"reveal": "silent" // Reveal the output only if unrecognized errors occur.
+			}
+		},
+		// ## XCode
+		{
+			"dependsOn":[ // 任务依赖，在执行该任务前，需要先执行依赖任务
+				"Create Bin folder",
+				"Generate build files (XCode)"
+			],
+			"label": "Build (XCode)",
+			"type": "shell",
+			"group": "build",
+			"command": "xcodebuild",
+			"args": [
+				"-workspace",
+				"${workspaceFolderBasename}.xcworkspace",
+				"-scheme",
+				"${input:buildProject}",
+				"-configuration",
+				"${input:buildMode}",
+				"-arch",
+				"x86_64"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/../build"
+			},
+			"problemMatcher": ["$gcc"]
+		},
+
+		// ## vs2022 Rebuild
+		{
+			"dependsOn":[
+				"Clean Bin folder",
+				"Build (vs2022)"
+			],
+			"label": "Rebuild (vs2022)",
+			"group": "build"
+		},
+		// ## XCode Rebuild
+		{
+			"dependsOn":[
+				"Clean Bin folder",
+				"Build (XCode)"
+			],
+			"label": "Rebuild (XCode)",
+			"group": "build"
+		}
+	],
+
+	"inputs": [
+		{
+			"id": "buildProject",																			// 标识
+			"description": "Select project to build:",  													// UI上的描述
+			"default": "Sample",																			// 默认值
+			"type": "pickString",																			// 类型，只有3个选项"promptString", "pickString", "command"
+			"options": ["Sample"]																			// 选项
+		},
+		{
+			"id": "buildMode",
+			"description": "Select build mode:",
+			"default": "Debug",
+			"type": "pickString",
+			"options": ["Debug", "Release"]
+		}
+	]
+}

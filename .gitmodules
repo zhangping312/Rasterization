@@ -1,0 +1,9 @@
+[submodule "_Third/spdlog"]
+	path = _Third/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "_Third/imgui"]
+	path = _Third/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "_Third/stb"]
+	path = _Third/stb
+	url = https://github.com/nothings/stb.git

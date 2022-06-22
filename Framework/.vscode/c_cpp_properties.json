@@ -1,0 +1,33 @@
+{
+	"configurations": [
+		{
+			"name": "Win32",
+			"includePath": [
+				"${workspaceFolder}/**",
+				"${workspaceFolder}/../_Third/spdlog/include/**",
+				"${workspaceFolder}/../_Third/SDL2-2.0.20/include/**",
+				"${workspaceFolder}/../_Third/imgui/**",
+				"${workspaceFolder}/../_Third/stb/**"
+			],
+			"defines": ["PLATFORM_WINDOWS"],
+			"cStandard": "c11",
+			"cppStandard": "c++20",
+			"intelliSenseMode": "${default}"
+		},
+		{
+			"name": "Mac",
+			"includePath": [
+				"${workspaceFolder}/**",
+				"${workspaceFolder}/../_Third/spdlog/include/**",
+				"${workspaceFolder}/../_Third/SDL2-2.0.20/include/**",
+				"${workspaceFolder}/../_Third/imgui/**",
+				"${workspaceFolder}/../_Third/stb/**"
+			],
+			"defines": ["PLATFORM_MAC"],
+			"cStandard": "c11",
+			"cppStandard": "c++20",
+			"intelliSenseMode": "${default}"
+		}
+	],
+	"version": 4
+}
